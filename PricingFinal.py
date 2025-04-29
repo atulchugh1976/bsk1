@@ -201,7 +201,7 @@ if st.session_state.get("confirm") and (gross_margin >= 30):
     if st.button("✉️ Email SPA"):
         message = EmailMessage()
         message['Subject'] = f"BeyondSkool - School Partnership Agreement - {school_name}"
-        message['From'] = "youremail@example.com"
+        message['From'] = "atul@beyondskool.in"
         message['To'] = [st.session_state['school_email']]
         message['Cc'] = [st.session_state['your_email'], "adesh.koli@beyondskool.in", "finance@beyondskool.in"]
         message['Bcc'] = ["atul@beyondskool.in"]
@@ -218,7 +218,7 @@ BeyondSkool Partnerships Team
         try:
             with smtplib.SMTP('smtp.gmail.com', 587) as smtp:
                 smtp.starttls()
-                smtp.login("youremail@example.com", "yourpassword")  # Replace with App Password
+                smtp.login("atul@beyondskool.in", "onut hmrw znpl exno")  # Replace with App Password
                 smtp.send_message(message)
             st.success("🎉 SPA Created and Sent Successfully!")
         except Exception as e:
