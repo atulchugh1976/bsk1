@@ -11,7 +11,7 @@ from datetime import datetime
 st.set_page_config(page_title="BeyondSkool Pricing Wizard", layout="centered")
 
 # ---------- BRANDING ----------
-logo = Image.open("BeyondSkool_logo.png")  # Replace with actual logo filename
+logo = Image.open("BeyondSkool_logo.png")
 st.image(logo, use_container_width=True)
 st.title("BeyondSkool Pricing Wizard")
 st.markdown("Empowering Schools with Transformative Learning Programs")
@@ -109,85 +109,81 @@ if st.session_state.get("calculate"):
             "Total Program Price": round(final_price)
         })
 
-    st.header("📊 Pricing Summary")
-    for block in program_blocks:
-        st.markdown(f"""
-        ### 📚 {block['Program']}
-        - 🎓 Students: {block['Students']}
-        - 📈 Sections: {block['Sections']}
-        - 👩‍🏫 Full-Time Teachers: {block['Full-Time Teachers']}
-        - 👨‍🏫 Variable Teacher Days: {block['Variable Teacher Days']}
-        - 💰 Price per Student: Rs.{block['Price per Student']}
-        - 💵 Total Program Price: Rs.{block['Total Program Price']:,}
-        """)
+    gross_margin = ((total_final_price - total_cost) / total_final_price) * 100
+    st.markdown(f"""<div style='position:fixed; bottom:10px; right:10px; color:white; background-color:white; padding:5px; border-radius:5px; font-size:10px;'>Gross Margin: {gross_margin:.2f}%</div>""", unsafe_allow_html=True)
 
-    st.subheader(f"Total Price: Rs.{round(total_final_price):,}")
-    st.subheader(f"Average Price per Student: Rs.{round(total_final_price/total_students)}")
+    if gross_margin < 30:
+        st.error("🚫 Gross Margin is below 30%. No Pricing can be offered.")
+    else:
+        st.header("📊 Pricing Summary")
+        for block in program_blocks:
+            st.markdown(f"""
+            ### 📚 {block['Program']}
+            - 🎓 Students: {block['Students']}
+            - 📈 Sections: {block['Sections']}
+            - 👩‍🏫 Full-Time Teachers: {block['Full-Time Teachers']}
+            - 👨‍🏫 Variable Teacher Days: {block['Variable Teacher Days']}
+            - 💰 Price per Student: Rs.{block['Price per Student']}
+            - 💵 Total Program Price: Rs.{block['Total Program Price']:,}
+            """)
 
-    if not st.session_state.get("confirm"):
-        if st.button("✅ Confirm Pricing"):
-            st.session_state["confirm"] = True
+        st.subheader(f"Total Price: Rs.{round(total_final_price):,}")
+        st.subheader(f"Average Price per Student: Rs.{round(total_final_price / total_students)}")
+
+        if not st.session_state.get("confirm"):
+            if st.button("✅ Confirm Pricing"):
+                st.session_state["confirm"] = True
 
 # ---------- SPA GENERATION + DOWNLOAD/EMAIL ----------
-# ---------- SPA GENERATION + DOWNLOAD/EMAIL ----------
-if st.session_state.get("confirm"):
+if st.session_state.get("confirm") and (gross_margin >= 30):
     spa_output_path = f"SPA_{school_name.replace(' ', '_')}.pdf"
     today = datetime.today().strftime('%d-%m-%Y')
 
     doc = fitz.open()
     page = doc.new_page()
 
-    # Insert logo if available
     try:
         logo = Image.open("BeyondSkool_logo.png")
-        img_bytes = logo.tobytes()
-        rect = fitz.Rect(50, 30, 200, 80)
-        page.insert_image(rect, stream=img_bytes)
+        rect = fitz.Rect(50, 30, 250, 80)
+        page.insert_image(rect, filename="BeyondSkool_logo.png")
         y = 100
     except:
-        y = 50  # If no logo, start normally
+        y = 50
 
-    # Heading
     page.insert_text((50, y), "School Partnership Agreement", fontsize=16)
     y += 40
-
-    # Parties
     page.insert_text((50, y), f"This agreement is made on {today} between:", fontsize=12)
     y += 20
-    page.insert_text((50, y), f"BeyondSkool EdTech Pvt Ltd (\"BeyondSkool\")", fontsize=12)
+    page.insert_text((50, y), "BeyondSkool EdTech Pvt Ltd (\"BeyondSkool\")", fontsize=12)
     y += 20
     page.insert_text((50, y), f"and {school_name} (\"School\").", fontsize=12)
     y += 40
 
-    # Programs
-    page.insert_text((50, y), "Programs and Participation:", fontsize=14)
+    page.insert_text((50, y), "Program Details:", fontsize=14)
     y += 30
     for block in program_blocks:
-        page.insert_text((60, y), f"- {block['Program']}: {block['Students']} students at ₹{block['Price per Student']}/student", fontsize=11)
+        page.insert_text((60, y), f"- {block['Program']} Program: {block['Students']} Students at Rs.{block['Price per Student']}/Student", fontsize=11)
         y += 20
-    page.insert_text((60, y), f"Total Students: {total_students}", fontsize=11)
+    page.insert_text((50, y), f"Total Students: {total_students}", fontsize=11)
     y += 20
-    page.insert_text((60, y), f"Total Price: ₹{round(total_final_price):,}", fontsize=11)
-    y += 30
+    page.insert_text((50, y), f"Total Price: Rs.{round(total_final_price):,}", fontsize=11)
+    y += 40
 
-    # Full Legal Clauses
     clauses = [
-        "1. Scope of Program: BeyondSkool will deliver the agreed programs at the school premises.",
-        "2. Academic Year: This partnership covers the academic session 2025-26 unless extended mutually.",
-        "3. Student Material: BeyondSkool will provide necessary student kits and learning materials.",
-        "4. Payment Terms: Payment is due as per mutually agreed schedule post invoice.",
-        "5. Taxes: All taxes applicable are extra unless explicitly mentioned inclusive.",
-        "6. Confidentiality: Both parties agree to maintain confidentiality regarding all information exchanged.",
-        "7. Indemnity: Each party indemnifies the other against any claims arising from negligence or misconduct.",
-        "8. Termination: Either party may terminate this agreement with 30 days written notice.",
-        "9. Jurisdiction: Any dispute shall be subject to the jurisdiction of Mumbai courts."
+        "1. Scope: BeyondSkool will deliver the selected programs at School premises through qualified faculty.",
+        "2. Academic Year: This Agreement is valid for the academic session 2025-26 unless extended by mutual consent.",
+        "3. Student Material: BeyondSkool will provide kits, books, and other required material as applicable.",
+        "4. Payment Terms: Payments are to be made against invoices as per mutually agreed schedules.",
+        "5. Taxes: All taxes as applicable are extra unless explicitly mentioned as inclusive.",
+        "6. Confidentiality: Both parties will maintain confidentiality of all shared proprietary information.",
+        "7. Indemnity: Each party indemnifies the other against claims arising out of negligence or misconduct.",
+        "8. Termination: Either party may terminate this Agreement with a 30-day written notice.",
+        "9. Jurisdiction: All disputes will be subject to the exclusive jurisdiction of Mumbai courts."
     ]
-
     for clause in clauses:
         page.insert_text((50, y), clause, fontsize=11)
         y += 20
 
-    # Acceptance
     y += 30
     page.insert_text((50, y), "Accepted and Agreed:", fontsize=14)
     y += 30
@@ -205,9 +201,9 @@ if st.session_state.get("confirm"):
     if st.button("✉️ Email SPA"):
         message = EmailMessage()
         message['Subject'] = f"BeyondSkool - School Partnership Agreement - {school_name}"
-        message['From'] = "atul@beyondskool.in"
+        message['From'] = "youremail@example.com"
         message['To'] = [st.session_state['school_email']]
-        message['Cc'] = [st.session_state['your_email'], "adesh.koli@beyondskool.in", "payal@beyondskool.in"]
+        message['Cc'] = [st.session_state['your_email'], "adesh.koli@beyondskool.in", "finance@beyondskool.in"]
         message['Bcc'] = ["atul@beyondskool.in"]
         message.set_content(f"""
 Dear {school_name} Team,
@@ -222,7 +218,7 @@ BeyondSkool Partnerships Team
         try:
             with smtplib.SMTP('smtp.gmail.com', 587) as smtp:
                 smtp.starttls()
-                smtp.login("atul@beyondskool.in", "jnuw odsn iqep almh")  # Replace credentials
+                smtp.login("youremail@example.com", "yourpassword")  # Replace with App Password
                 smtp.send_message(message)
             st.success("🎉 SPA Created and Sent Successfully!")
         except Exception as e:
