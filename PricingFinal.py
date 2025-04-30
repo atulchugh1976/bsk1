@@ -113,7 +113,7 @@ if st.session_state.get("calculate"):
     st.markdown(f"""<div style='position:fixed; bottom:10px; right:10px; color:white; background-color:white; padding:5px; border-radius:5px; font-size:10px;'>Gross Margin: {gross_margin:.2f}%</div>""", unsafe_allow_html=True)
 
     if gross_margin < 30:
-        st.error("🚫 Gross Margin is below 30%. No Pricing can be offered.")
+        st.error(" No Pricing can be offered.")
     else:
         st.header("📊 Pricing Summary")
         for block in program_blocks:
