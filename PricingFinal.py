@@ -4,6 +4,7 @@ import pandas as pd
 import fitz
 from PIL import Image
 import smtplib
+import os
 from email.message import EmailMessage
 from datetime import datetime
 
@@ -187,7 +188,7 @@ if st.session_state.get("confirm") and (gross_margin >= 30):
     y += 30
     page.insert_text((50, y), "Accepted and Agreed:", fontsize=14)
     y += 30
-    page.insert_text((50, y), "For BeyondSkool EdTech Pvt Ltd", fontsize=12)
+    page.insert_text((50, y), "For Ivy Minds Learning Solutions Pvt Ltd", fontsize=12)
     page.insert_text((300, y), f"For {school_name}", fontsize=12)
 
     doc.save(spa_output_path)
@@ -218,7 +219,7 @@ BeyondSkool Partnerships Team
         try:
             with smtplib.SMTP('smtp.gmail.com', 587) as smtp:
                 smtp.starttls()
-                smtp.login("partnership@beyondskool.in", "pfua uxjc mzuj jmdz")  # Replace with App Password
+                smtp.login(os.getenv("partnership@beyondskool.in   "), os.getenv("pfua uxjc mzuj jmdz"))  # Replace with App Password
                 smtp.send_message(message)
             st.success("🎉 SPA Created and Sent Successfully!")
         except Exception as e:
