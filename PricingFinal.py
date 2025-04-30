@@ -203,7 +203,7 @@ if st.session_state.get("confirm") and (gross_margin >= 30):
         message['Subject'] = f"BeyondSkool - School Partnership Agreement - {school_name}"
         message['From'] = "atul@beyondskool.in"
         message['To'] = [st.session_state['school_email']]
-        message['Cc'] = [st.session_state['your_email'], "adesh.koli@beyondskool.in", "finance@beyondskool.in"]
+        message['Cc'] = [st.session_state['your_email'], "adesh.koli@beyondskool.in", "accounts@beyondskool.in"]
         message['Bcc'] = ["atul@beyondskool.in"]
         message.set_content(f"""
 Dear {school_name} Team,
@@ -218,8 +218,36 @@ BeyondSkool Partnerships Team
         try:
             with smtplib.SMTP('smtp.gmail.com', 587) as smtp:
                 smtp.starttls()
-                smtp.login("atul@beyondskool.in", "onut hmrw znpl exno")  # Replace with App Password
+                smtp.login("partnership@beyondskool.in", "pfua uxjc mzuj jmdz")  # Replace with App Password
                 smtp.send_message(message)
             st.success("🎉 SPA Created and Sent Successfully!")
         except Exception as e:
-            st.error(f"Failed to send email: {e}")
+  
+
+# ---------- INSERT COMMERCIAL TABLE INTO SPA PDF ----------
+y += 40
+page.insert_text((50, y), "Commercial Terms:", fontsize=14)
+y += 30
+page.insert_text((50, y), "Program             Students  Sections  Book Price  Service Fee  GST", fontsize=11)
+y += 20
+for row in spa_commercial_rows:
+    line = f"{row['Program']:<20}{row['Students']:>8}  {row['Sections']:>8}     ₹{row['Book Price']:>5}     ₹{row['Service Fee']:>6}     ₹{row['GST on Service']:>4}"
+    page.insert_text((50, y), line, fontsize=10)
+    y += 20
+
+# ---------- TOTALS FOR COMMERCIAL TABLE ----------
+total_students = sum(row['Students'] for row in spa_commercial_rows)
+total_book_cost = sum(row['Book Price'] * row['Students'] for row in spa_commercial_rows)
+total_service_fee = sum(row['Service Fee'] * row['Students'] for row in spa_commercial_rows)
+total_gst = sum(row['GST on Service'] * row['Students'] for row in spa_commercial_rows)
+total_payable = total_book_cost + total_service_fee + total_gst
+
+y += 30
+page.insert_text((50, y), f"Total Book Cost: ₹{total_book_cost:,}", fontsize=11)
+y += 20
+page.insert_text((50, y), f"Total Service Fee: ₹{total_service_fee:,}", fontsize=11)
+y += 20
+page.insert_text((50, y), f"Total GST on Services: ₹{total_gst:,}", fontsize=11)
+y += 20
+page.insert_text((50, y), f"Total Payable (Books + Services + GST): ₹{round(total_payable):,}", fontsize=11)
+
