@@ -148,7 +148,7 @@ if st.session_state.get("confirm") and (gross_margin >= 30):
         page.insert_image(rect, filename="BeyondSkool_logo.png")
         y = 100
     except:
-    y = 50  # fallback if logo fails to load
+        y = 50  # fallback if logo fails to load
 
     page.insert_text((50, y), "School Partnership Agreement", fontsize=16)
     y += 40
