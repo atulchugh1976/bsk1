@@ -148,7 +148,7 @@ if st.session_state.get("confirm") and (gross_margin >= 30):
         page.insert_image(rect, filename="BeyondSkool_logo.png")
         y = 100
     except:
-        y = 50
+    y = 50  # fallback if logo fails to load
 
     page.insert_text((50, y), "School Partnership Agreement", fontsize=16)
     y += 40
@@ -222,8 +222,7 @@ BeyondSkool Partnerships Team
                 smtp.send_message(message)
             st.success("🎉 SPA Created and Sent Successfully!")
         except Exception as e:
-  
-
+            st.error(f"Failed to send email: {e}")
 # ---------- INSERT COMMERCIAL TABLE INTO SPA PDF ----------
 y += 40
 page.insert_text((50, y), "Commercial Terms:", fontsize=14)
@@ -250,4 +249,3 @@ y += 20
 page.insert_text((50, y), f"Total GST on Services: ₹{total_gst:,}", fontsize=11)
 y += 20
 page.insert_text((50, y), f"Total Payable (Books + Services + GST): ₹{round(total_payable):,}", fontsize=11)
-
