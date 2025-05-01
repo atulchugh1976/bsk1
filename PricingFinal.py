@@ -195,7 +195,7 @@ if st.session_state.get("confirm") and (gross_margin >= 30):
     y += 30
     page.insert_text((50, y), "Accepted and Agreed:", fontsize=14)
     y += 30
-    page.insert_text((50, y), "For BeyondSkool EdTech Pvt Ltd", fontsize=12)
+    page.insert_text((50, y), "For Ivy Minds Learning Solutions Pvt LTD ", fontsize=12)
     page.insert_text((300, y), f"For {school_name}", fontsize=12)
 
     # ---------- COMMERCIAL TABLE ----------
@@ -277,7 +277,7 @@ BeyondSkool Partnerships Team
         try:
             with smtplib.SMTP('smtp.gmail.com', 587) as smtp:
                 smtp.starttls()
-                smtp.login(os.getenv("EMAIL_USER"), os.getenv("EMAIL_PASS"))
+                smtp.login(os.getenv("partnership@beyondskool.in"), os.getenv("pfua uxjc mzuj jmdz"))
                 smtp.send_message(message)
             st.success("🎉 SPA Created and Sent Successfully!")
         except Exception as e:
