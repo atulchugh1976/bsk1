@@ -40,17 +40,7 @@ if programs_selected:
             full_teachers = 0
             variable_teacher_days = math.ceil(sections / 5)
             teacher_day_cost = variable_teacher_days * 2000 * 35
-        else:
-            full_teachers = sections // max_sections_per_teacher
-            remaining = sections % max_sections_per_teacher
-
-            if 0 < remaining < 20:
-                variable_teacher_days = math.ceil(remaining / 5)
-                teacher_day_cost = variable_teacher_days * 2000 * 35
-            elif remaining >= 20:
-                full_teachers += 1
-                variable_teacher_days = 0
-                teacher_day_cost = 0
+        # Duplicate 'else' block removed due to syntax error
 
             # Add 10% coverage for full-time teachers' absence via variable teachers
             full_time_sessions = full_teachers * max_sections_per_teacher * 35
