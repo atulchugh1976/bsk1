@@ -27,6 +27,11 @@ school_days = st.radio("📅 School operates:", ["5 days a week", "6 days a week
 student_info = {}
 if programs_selected:
     for prog in programs_selected:
+        students = st.number_input(f"🎓 Number of Students - {prog}", min_value=50, max_value=3000, step=50, key=f"students_{prog}")
+        section_size = st.number_input(f"👩‍🏫 Students per Section - {prog}", min_value=10, max_value=60, step=5, value=30, key=f"section_{prog}")
+        student_info[prog] = {"students": students, "section_size": section_size}
+
+    for prog in programs_selected:
         data = student_info[prog]
         students = data["students"]
         section_size = data["section_size"]
