@@ -253,28 +253,4 @@ BeyondSkool Partnerships Team
             st.success("🎉 SPA Created and Sent Successfully!")
         except Exception as e:
             st.error(f"Failed to send email: {e}")
-y += 40
-page.insert_text((50, y), "Commercial Terms:", fontsize=14)
-y += 30
-page.insert_text((50, y), "Program             Students  Sections  Book Price  Service Fee  GST", fontsize=11)
-y += 20
-for row in spa_commercial_rows:
-    line = f"{row['Program']:<20}{row['Students']:>8}  {row['Sections']:>8}     ₹{row['Book Price']:>5}     ₹{row['Service Fee']:>6}     ₹{row['GST on Service']:>4}"
-    page.insert_text((50, y), line, fontsize=10)
-    y += 20
-
-# ---------- TOTALS FOR COMMERCIAL TABLE ----------
-total_students = sum(row['Students'] for row in spa_commercial_rows)
-total_book_cost = sum(row['Book Price'] * row['Students'] for row in spa_commercial_rows)
-total_service_fee = sum(row['Service Fee'] * row['Students'] for row in spa_commercial_rows)
-total_gst = sum(row['GST on Service'] * row['Students'] for row in spa_commercial_rows)
-total_payable = total_book_cost + total_service_fee + total_gst
-
-y += 30
-page.insert_text((50, y), f"Total Book Cost: ₹{total_book_cost:,}", fontsize=11)
-y += 20
-page.insert_text((50, y), f"Total Service Fee: ₹{total_service_fee:,}", fontsize=11)
-y += 20
-page.insert_text((50, y), f"Total GST on Services: ₹{total_gst:,}", fontsize=11)
-y += 20
-page.insert_text((50, y), f"Total Payable (Books + Services + GST): ₹{round(total_payable):,}", fontsize=11)
+# 🔁 Removed duplicate commercial table block after doc.close()
