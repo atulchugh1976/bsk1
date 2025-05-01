@@ -142,4 +142,143 @@ if st.session_state.get("calculate"):
             if st.button("✅ Confirm Pricing"):
                 st.session_state["confirm"] = True
 
-# (SPA generation, commercial table, and email logic would continue here…)
+# ---------- SPA GENERATION + DOWNLOAD/EMAIL ----------
+if st.session_state.get("confirm") and (gross_margin >= 30):
+    spa_output_path = f"SPA_{school_name.replace(' ', '_')}.pdf"
+    today = datetime.today().strftime('%d-%m-%Y')
+
+    doc = fitz.open()
+    page = doc.new_page()
+
+    try:
+        logo = Image.open("BeyondSkool_logo.png")
+        rect = fitz.Rect(50, 30, 250, 80)
+        page.insert_image(rect, filename="BeyondSkool_logo.png")
+        y = 100
+    except:
+        y = 50
+
+    page.insert_text((50, y), "School Partnership Agreement", fontsize=16)
+    y += 40
+    page.insert_text((50, y), f"This agreement is made on {today} between:", fontsize=12)
+    y += 20
+    page.insert_text((50, y), "BeyondSkool EdTech Pvt Ltd (\"BeyondSkool\")", fontsize=12)
+    y += 20
+    page.insert_text((50, y), f"and {school_name} (\"School\").", fontsize=12)
+    y += 40
+
+    page.insert_text((50, y), "Program Details:", fontsize=14)
+    y += 30
+    for block in program_blocks:
+        page.insert_text((60, y), f"- {block['Program']} Program: {block['Students']} Students at Rs.{block['Price per Student']}/Student", fontsize=11)
+        y += 20
+    page.insert_text((50, y), f"Total Students: {total_students}", fontsize=11)
+    y += 20
+    page.insert_text((50, y), f"Total Price: Rs.{round(total_final_price):,}", fontsize=11)
+    y += 40
+
+    clauses = [
+        "1. Scope: BeyondSkool will deliver the selected programs at School premises through qualified faculty.",
+        "2. Academic Year: This Agreement is valid for the academic session 2025-26 unless extended by mutual consent.",
+        "3. Student Material: BeyondSkool will provide kits, books, and other required material as applicable.",
+        "4. Payment Terms: Payments are to be made against invoices as per mutually agreed schedules.",
+        "5. Taxes: All taxes as applicable are extra unless explicitly mentioned as inclusive.",
+        "6. Confidentiality: Both parties will maintain confidentiality of all shared proprietary information.",
+        "7. Indemnity: Each party indemnifies the other against claims arising out of negligence or misconduct.",
+        "8. Termination: Either party may terminate this Agreement with a 30-day written notice.",
+        "9. Jurisdiction: All disputes will be subject to the exclusive jurisdiction of Mumbai courts."
+    ]
+    for clause in clauses:
+        page.insert_text((50, y), clause, fontsize=11)
+        y += 20
+
+    y += 30
+    page.insert_text((50, y), "Accepted and Agreed:", fontsize=14)
+    y += 30
+    page.insert_text((50, y), "For BeyondSkool EdTech Pvt Ltd", fontsize=12)
+    page.insert_text((300, y), f"For {school_name}", fontsize=12)
+
+    # ---------- COMMERCIAL TABLE ----------
+    spa_commercial_rows = []
+    for block in program_blocks:
+        prog = block["Program"]
+        students = block["Students"]
+        sections = block["Sections"]
+        price_per_student = block["Price per Student"]
+
+        book_base = 1200 if prog in ["Communication", "Financial Literacy"] else 1800
+        if price_per_student <= book_base:
+            book_price = price_per_student
+            service_fee = 0
+            gst = 0
+        else:
+            book_price = book_base
+            service_fee = price_per_student - book_base
+            gst = round(service_fee * 0.18)
+
+        spa_commercial_rows.append({
+            "Program": prog,
+            "Students": students,
+            "Sections": sections,
+            "Book Price": book_price,
+            "Service Fee": service_fee,
+            "GST on Service": gst
+        })
+
+    y += 40
+    page.insert_text((50, y), "Commercial Terms:", fontsize=14)
+    y += 30
+    page.insert_text((50, y), "Program             Students  Sections  Book Price  Service Fee  GST", fontsize=11)
+    y += 20
+    for row in spa_commercial_rows:
+        line = f"{row['Program']:<20}{row['Students']:>8}  {row['Sections']:>8}     ₹{row['Book Price']:>5}     ₹{row['Service Fee']:>6}     ₹{row['GST on Service']:>4}"
+        page.insert_text((50, y), line, fontsize=10)
+        y += 20
+
+    total_book_cost = sum(row['Book Price'] * row['Students'] for row in spa_commercial_rows)
+    total_service_fee = sum(row['Service Fee'] * row['Students'] for row in spa_commercial_rows)
+    total_gst = sum(row['GST on Service'] * row['Students'] for row in spa_commercial_rows)
+    total_payable = total_book_cost + total_service_fee + total_gst
+
+    y += 30
+    page.insert_text((50, y), f"Total Book Cost: ₹{total_book_cost:,}", fontsize=11)
+    y += 20
+    page.insert_text((50, y), f"Total Service Fee: ₹{total_service_fee:,}", fontsize=11)
+    y += 20
+    page.insert_text((50, y), f"Total GST on Services: ₹{total_gst:,}", fontsize=11)
+    y += 20
+    page.insert_text((50, y), f"Total Payable (Books + Services + GST): ₹{round(total_payable):,}", fontsize=11)
+
+    doc.save(spa_output_path)
+    doc.close()
+
+    with open(spa_output_path, "rb") as file:
+        pdf_data = file.read()
+
+    st.download_button("📄 Download SPA", data=pdf_data, file_name=spa_output_path)
+
+    if st.button("✉️ Email SPA"):
+        message = EmailMessage()
+        message['Subject'] = f"BeyondSkool - School Partnership Agreement - {school_name}"
+        message['From'] = os.getenv("EMAIL_USER")
+        message['To'] = [school_email]
+        message['Cc'] = [your_email, "adesh.koli@beyondskool.in", "accounts@beyondskool.in"]
+        message['Bcc'] = ["atul@beyondskool.in"]
+        message.set_content(f"""
+Dear {school_name} Team,
+
+Please find attached the School Partnership Agreement prepared by BeyondSkool.
+
+Warm Regards,
+BeyondSkool Partnerships Team
+        """)
+        message.add_attachment(pdf_data, maintype='application', subtype='pdf', filename=spa_output_path)
+
+        try:
+            with smtplib.SMTP('smtp.gmail.com', 587) as smtp:
+                smtp.starttls()
+                smtp.login(os.getenv("EMAIL_USER"), os.getenv("EMAIL_PASS"))
+                smtp.send_message(message)
+            st.success("🎉 SPA Created and Sent Successfully!")
+        except Exception as e:
+            st.error(f"Failed to send email: {e}")
